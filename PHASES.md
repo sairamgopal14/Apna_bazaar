@@ -3,12 +3,12 @@
 This project was built in 5 phases. Each phase maps back to a stage in the original PRD.
 
 | Our Phase | What it builds | PRD Stage |
-|---|---|---|
-| Phase 1 | Core search MVP — setup, seed data, Gemini semantic search, `/search` endpoint, ordering-window status | Stage 1 |
-| Phase 2 | Excel ingestion — admin uploads a daily menu file instead of manual seeding | Stage 1 |
-| Phase 3 | Broadcast/nudge system — organic nudges, AI-suggested nudges, seller-paid promos | Stage 1 |
-| Phase 4 | Admin analytics dashboard + weekly AI insights | Stage 1 |
-| Phase 5 | In-app pre-orders — Reserve button, `order_slot` table, enforced cutoffs, honest ratings | Stage 3 |
+|---|---|-----------|
+| Phase 1 | Core search MVP — setup, seed data, Gemini semantic search, `/search` endpoint, ordering-window status | Stage 1   |
+| Phase 2 | Excel ingestion — admin uploads a daily menu file instead of manual seeding | Stage 1   |
+| Phase 3 | Broadcast/nudge system — organic nudges, AI-suggested nudges, seller-paid promos | Stage 1   |
+| Phase 4 | Admin analytics dashboard + weekly AI insights | Stage 1   |
+| Phase 5 | In-app pre-orders — Reserve button, `order_slot` table, enforced cutoffs, honest ratings | Stage 2   |
 
 ---
 
