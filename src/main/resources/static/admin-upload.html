@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apna Bazaar — Upload Daily Sheet</title>
+<style>
+  :root {
+    --brand: #e2622c;
+    --brand-dark: #201108;
+    --bg: #f5f1ea;
+    --card-bg: #ffffff;
+    --text: #201108;
+    --muted: #7a6f63;
+    --border: #e6ddd0;
+    --good: #1a7a3c;
+    --bad: #a3392a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--brand-dark);
+    color: #fff;
+    padding: 14px 20px;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header h1 span { color: var(--brand); }
+  main { max-width: 520px; margin: 30px auto; padding: 0 20px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  select, input[type=file] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  button {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  .result { margin-top: 16px; font-size: 13px; }
+  .result table { width: 100%; border-collapse: collapse; }
+  .result td { padding: 4px 0; }
+  .result td:last-child { text-align: right; font-weight: 600; }
+  .errors { margin-top: 10px; color: var(--bad); font-size: 12.5px; }
+  .success { color: var(--good); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Apna <span>Bazaar</span> · Upload Daily Sheet</h1>
+</header>
+
+<main>
+  <div class="card">
+    <label for="community">Community</label>
+    <select id="community">
+      <option value="tridasa">MyHome Tridasa</option>
+      <option value="sayuk">MyHome Sayuk</option>
+    </select>
+
+    <label for="file">Today's Excel sheet (.xlsx)</label>
+    <input type="file" id="file" accept=".xlsx">
+
+    <button id="uploadBtn">Upload</button>
+
+    <div class="result" id="result"></div>
+  </div>
+</main>
+
+<script>
+  const communitySelect = document.getElementById('community');
+  const fileInput = document.getElementById('file');
+  const uploadBtn = document.getElementById('uploadBtn');
+  const resultEl = document.getElementById('result');
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  uploadBtn.addEventListener('click', async () => {
+    const file = fileInput.files[0];
+    if (!file) {
+      resultEl.innerHTML = '<span class="errors">Pick a .xlsx file first.</span>';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    uploadBtn.disabled = true;
+    resultEl.textContent = 'Uploading…';
+
+    try {
+      const res = await fetch(`/admin/upload?communitySlug=${communitySelect.value}`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        resultEl.innerHTML = `<span class="errors">Upload failed (${res.status}).</span>`;
+        return;
+      }
+
+      const data = await res.json();
+      let html = '<span class="success">Upload complete.</span><table>' +
+        `<tr><td>Sellers created</td><td>${data.sellersCreated}</td></tr>` +
+        `<tr><td>Sellers reused</td><td>${data.sellersReused}</td></tr>` +
+        `<tr><td>Offerings created</td><td>${data.offeringsCreated}</td></tr>` +
+        `<tr><td>Listings created</td><td>${data.listingsCreated}</td></tr>` +
+        `<tr><td>Listings updated</td><td>${data.listingsUpdated}</td></tr>` +
+        `<tr><td>Sellers deactivated</td><td>${data.sellersDeactivated}</td></tr>` +
+        '</table>';
+
+      if (data.rowErrors && data.rowErrors.length) {
+        html += '<div class="errors">' + data.rowErrors.map(e => escapeHtml(e)).join('<br>') + '</div>';
+      }
+
+      resultEl.innerHTML = html;
+    } catch (e) {
+      resultEl.innerHTML = '<span class="errors">Network error — is the backend running?</span>';
+    } finally {
+      uploadBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

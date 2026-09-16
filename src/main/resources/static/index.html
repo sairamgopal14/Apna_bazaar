@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apna Bazaar</title>
+<style>
+  :root {
+    --brand: #e2622c;
+    --brand-dark: #201108;
+    --bg: #f5f1ea;
+    --card-bg: #ffffff;
+    --text: #201108;
+    --muted: #7a6f63;
+    --border: #e6ddd0;
+    --status-open: #1a7a3c;
+    --status-closed: #a3392a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: var(--brand-dark);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  header h1 span { color: var(--brand); }
+  select#community {
+    background: #2c1b10;
+    color: #fff;
+    border: 1px solid #4a3626;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: var(--brand);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    align-self: flex-start;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 92%;
+    align-self: flex-start;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .card .shop {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .card .offering {
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  .card .desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .card .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .card .price {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .card .status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .status.actionable { color: var(--status-open); background: #e6f4ea; }
+  .status.closed { color: var(--status-closed); background: #fbe9e6; }
+  .card .wa-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: #25d366;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .card .wa-btn:disabled { opacity: 0.6; cursor: default; }
+  .card .rating {
+    color: #b8860b;
+    font-weight: 600;
+    font-size: 13px;
+    margin-left: 6px;
+  }
+  .rating-prompt .stars { margin-top: 8px; }
+  .star-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+    color: #b8860b;
+    font-size: 13px;
+  }
+  #inputBar {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--card-bg);
+    flex-shrink: 0;
+  }
+  #queryInput {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+  }
+  #queryInput:focus { border-color: var(--brand); }
+  #sendBtn {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #sendBtn:disabled { opacity: 0.5; cursor: default; }
+  .hint { font-size: 12px; color: var(--muted); align-self: flex-start; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Apna <span>Bazaar</span></h1>
+  <select id="community">
+    <option value="tridasa">MyHome Tridasa</option>
+    <option value="sayuk">MyHome Sayuk</option>
+  </select>
+</header>
+
+<div id="chat">
+  <div class="msg bot">
+    Hi! What are you looking for today? Try "idli", "something sweet and cold", or "maths tuition".
+  </div>
+</div>
+
+<div id="inputBar">
+  <input id="queryInput" type="text" placeholder="Search for food, groceries, services..." autocomplete="off">
+  <button id="sendBtn">Send</button>
+</div>
+
+<script>
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('queryInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const communitySelect = document.getElementById('community');
+
+  function getSessionId() {
+    let id = localStorage.getItem('apnaBazaarSessionId');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('apnaBazaarSessionId', id);
+    }
+    return id;
+  }
+
+  const sessionId = getSessionId();
+
+  function addMessage(text, sender) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + sender;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function waLink(whatsappNumber, offeringName) {
+    const digits = whatsappNumber.replace(/[^\d]/g, '');
+    const text = encodeURIComponent(`Hi, I'd like to order: ${offeringName}`);
+    return `https://wa.me/${digits}?text=${text}`;
+  }
+
+  function renderResults(results) {
+    const wrap = document.createElement('div');
+    wrap.className = 'results';
+
+    results.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const statusClass = /closed|not available/i.test(r.statusLabel) ? 'closed' : 'actionable';
+
+      const ratingHtml = r.rating ? ` <span class="rating">★ ${r.rating}</span>` : '';
+
+      card.innerHTML = `
+        <div class="shop">${escapeHtml(r.shopName)}${ratingHtml}</div>
+        <div class="offering">${escapeHtml(r.offeringName)}</div>
+        <div class="desc">${escapeHtml(r.description)}</div>
+        <div class="row">
+          <span class="price">₹${r.price}</span>
+          <span class="status ${statusClass}">${escapeHtml(r.statusLabel)}</span>
+        </div>
+      `;
+
+      const reserveBtn = document.createElement('button');
+      reserveBtn.className = 'wa-btn';
+      reserveBtn.textContent = 'Reserve & Message on WhatsApp';
+      reserveBtn.addEventListener('click', () => reserveAndMessage(r, reserveBtn));
+      card.appendChild(reserveBtn);
+
+      wrap.appendChild(card);
+    });
+
+    chat.appendChild(wrap);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  async function reserveAndMessage(result, button) {
+    button.disabled = true;
+    try {
+      const res = await fetch(`/search/${result.offeringId}/reserve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dailyLineItemId: result.dailyLineItemId, sessionId })
+      });
+
+      if (!res.ok) {
+        let message = 'Sorry, this offer is no longer available.';
+        try {
+          const errorBody = await res.json();
+          if (errorBody.message) message = errorBody.message;
+        } catch (e) { /* body wasn't JSON */ }
+        addMessage(message, 'bot');
+        button.disabled = false;
+        return;
+      }
+
+      fetch(`/search/${result.offeringId}/click`, { method: 'POST' }).catch(() => {});
+      button.textContent = 'Reserved ✓';
+      window.open(waLink(result.whatsappNumber, result.offeringName), '_blank', 'noopener');
+    } catch (e) {
+      addMessage('Network error — is the backend running?', 'bot');
+      button.disabled = false;
+    }
+  }
+
+  async function checkPendingRatings() {
+    try {
+      const res = await fetch(`/search/pending-ratings?sessionId=${sessionId}`);
+      if (!res.ok) return;
+      const pending = await res.json();
+      pending.forEach(showRatingPrompt);
+    } catch (e) { /* quietly skip -- this is a soft prompt, not critical */ }
+  }
+
+  function showRatingPrompt(p) {
+    const card = document.createElement('div');
+    card.className = 'msg bot rating-prompt';
+    card.innerHTML = `You reserved <strong>${escapeHtml(p.itemName)}</strong> from <strong>${escapeHtml(p.shopName)}</strong> on ${p.itemDate} — how was it?`;
+
+    const stars = document.createElement('div');
+    stars.className = 'stars';
+    for (let i = 1; i <= 5; i++) {
+      const starBtn = document.createElement('button');
+      starBtn.className = 'star-btn';
+      starBtn.textContent = '★'.repeat(i);
+      starBtn.addEventListener('click', async () => {
+        stars.querySelectorAll('button').forEach(b => b.disabled = true);
+        try {
+          await fetch(`/order-slots/${p.orderSlotId}/rating`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rating: i })
+          });
+          stars.innerHTML = '<em>Thanks for rating!</em>';
+        } catch (e) {
+          stars.innerHTML = '<em>Could not save your rating — try again later.</em>';
+        }
+      });
+      stars.appendChild(starBtn);
+    }
+    card.appendChild(stars);
+    chat.appendChild(card);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  async function runSearch() {
+    const query = input.value.trim();
+    if (!query) return;
+
+    addMessage(query, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    try {
+      const res = await fetch('/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          communitySlug: communitySelect.value,
+          query,
+          sessionId
+        })
+      });
+
+      if (!res.ok) {
+        addMessage('Something went wrong (' + res.status + '). Try again?', 'bot');
+        return;
+      }
+
+      const data = await res.json();
+      if (data.resultCount === 0) {
+        addMessage("No sellers matched that today — we've logged it so admin can find someone for it.", 'bot');
+      } else {
+        addMessage(`Found ${data.resultCount} match${data.resultCount > 1 ? 'es' : ''}:`, 'bot');
+        renderResults(data.results);
+      }
+    } catch (e) {
+      addMessage('Network error — is the backend running?', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  sendBtn.addEventListener('click', runSearch);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') runSearch();
+  });
+
+  checkPendingRatings();
+</script>
+
+</body>
+</html>

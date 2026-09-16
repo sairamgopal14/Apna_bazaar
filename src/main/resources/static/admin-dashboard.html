@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apna Bazaar — Admin Dashboard</title>
+<style>
+  :root {
+    --brand: #e2622c;
+    --brand-dark: #201108;
+    --bg: #f5f1ea;
+    --card-bg: #ffffff;
+    --text: #201108;
+    --muted: #7a6f63;
+    --border: #e6ddd0;
+    --good: #1a7a3c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--brand-dark);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; margin: 0; }
+  header h1 span { color: var(--brand); }
+  header .controls { display: flex; gap: 8px; align-items: center; }
+  select#community, button {
+    background: #2c1b10;
+    color: #fff;
+    border: 1px solid #4a3626;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  button.primary { background: var(--brand); border-color: var(--brand); font-weight: 600; }
+  button:disabled { opacity: 0.5; cursor: default; }
+  main { max-width: 960px; margin: 0 auto; padding: 20px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .stat-card .label { font-size: 12px; color: var(--muted); }
+  .stat-card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+  section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  section h2 { font-size: 15px; margin: 0 0 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+  .insight-text { font-size: 14px; line-height: 1.5; }
+  .insight-meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .empty { color: var(--muted); font-size: 13px; }
+  .ctr-pill { font-weight: 600; color: var(--good); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Apna <span>Bazaar</span> · Admin Dashboard</h1>
+  <div class="controls">
+    <select id="community">
+      <option value="tridasa">MyHome Tridasa</option>
+      <option value="sayuk">MyHome Sayuk</option>
+    </select>
+    <button id="refreshBtn">Refresh</button>
+    <button id="generateBtn" class="primary">Generate insight now</button>
+  </div>
+</header>
+
+<main>
+  <div class="stat-grid" id="statGrid"></div>
+
+  <section>
+    <h2>Top queries today</h2>
+    <div id="topQueries"></div>
+  </section>
+
+  <section>
+    <h2>Seller click-through rate today</h2>
+    <div id="ctrTable"></div>
+  </section>
+
+  <section>
+    <h2>Latest weekly AI insight</h2>
+    <div id="insight"></div>
+  </section>
+</main>
+
+<script>
+  const communitySelect = document.getElementById('community');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const generateBtn = document.getElementById('generateBtn');
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  function renderStats(d) {
+    const stats = [
+      ['Total searches today', d.totalSearchesToday],
+      ['Zero-result searches', d.zeroResultQueriesToday],
+      ['Peak search time', d.peakSearchTime ?? '—'],
+      ['Active sellers today', d.activeSellersToday],
+    ];
+    document.getElementById('statGrid').innerHTML = stats.map(([label, value]) => `
+      <div class="stat-card">
+        <div class="label">${escapeHtml(label)}</div>
+        <div class="value">${escapeHtml(String(value))}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderTopQueries(topQueries) {
+    const el = document.getElementById('topQueries');
+    if (!topQueries.length) {
+      el.innerHTML = '<div class="empty">No searches logged today yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <table>
+        <thead><tr><th>Query</th><th>Searches</th></tr></thead>
+        <tbody>
+          ${topQueries.map(q => `<tr><td>${escapeHtml(q.normalisedQuery)}</td><td>${q.searchCount}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderCtr(rows) {
+    const el = document.getElementById('ctrTable');
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty">No offerings shown in search results today yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <table>
+        <thead><tr><th>Seller</th><th>Shown</th><th>Clicked</th><th>CTR</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${escapeHtml(r.shopName)}</td>
+              <td>${r.impressions}</td>
+              <td>${r.clicks}</td>
+              <td class="ctr-pill">${r.clickThroughRate.toFixed(1)}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderInsight(text, weekStart) {
+    const el = document.getElementById('insight');
+    if (!text) {
+      el.innerHTML = '<div class="empty">No AI insight generated yet — click "Generate insight now" to create one from the last 7 days.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div class="insight-text">${escapeHtml(text)}</div>
+      <div class="insight-meta">Week starting ${escapeHtml(weekStart)}</div>
+    `;
+  }
+
+  async function loadDashboard() {
+    refreshBtn.disabled = true;
+    try {
+      const res = await fetch(`/admin/dashboard?communitySlug=${communitySelect.value}`);
+      if (!res.ok) {
+        alert('Failed to load dashboard (' + res.status + ')');
+        return;
+      }
+      const data = await res.json();
+      renderStats(data);
+      renderTopQueries(data.topQueries);
+      renderCtr(data.sellerClickThroughRates);
+      renderInsight(data.latestInsight, data.insightWeekStart);
+    } catch (e) {
+      alert('Network error — is the backend running?');
+    } finally {
+      refreshBtn.disabled = false;
+    }
+  }
+
+  async function generateInsight() {
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Generating…';
+    try {
+      const res = await fetch(`/admin/dashboard/insights/generate?communitySlug=${communitySelect.value}`, {
+        method: 'POST'
+      });
+      if (!res.ok) {
+        alert('Failed to generate insight (' + res.status + ')');
+        return;
+      }
+      await loadDashboard();
+    } catch (e) {
+      alert('Network error — is the backend running?');
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = 'Generate insight now';
+    }
+  }
+
+  refreshBtn.addEventListener('click', loadDashboard);
+  generateBtn.addEventListener('click', generateInsight);
+  communitySelect.addEventListener('change', loadDashboard);
+
+  loadDashboard();
+</script>
+
+</body>
+</html>
