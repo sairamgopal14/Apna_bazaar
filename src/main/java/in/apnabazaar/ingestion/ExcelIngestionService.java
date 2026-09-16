@@ -2,6 +2,8 @@ package in.apnabazaar.ingestion;
 
 import in.apnabazaar.community.Community;
 import in.apnabazaar.community.CommunityRepository;
+import in.apnabazaar.offering.Category;
+import in.apnabazaar.offering.CategoryRepository;
 import in.apnabazaar.offering.DailyLineItem;
 import in.apnabazaar.offering.DailyLineItemRepository;
 import in.apnabazaar.offering.DeliveryType;
@@ -50,6 +52,7 @@ public class ExcelIngestionService {
     private final ProviderRepository providerRepository;
     private final OfferingRepository offeringRepository;
     private final OfferingScheduleRepository offeringScheduleRepository;
+    private final CategoryRepository categoryRepository;
     private final DailyPostRepository dailyPostRepository;
     private final DailyLineItemRepository dailyLineItemRepository;
     private final ExcelSheetParser excelSheetParser;
@@ -57,6 +60,7 @@ public class ExcelIngestionService {
     public ExcelIngestionService(CommunityRepository communityRepository, ProviderRepository providerRepository,
                                   OfferingRepository offeringRepository,
                                   OfferingScheduleRepository offeringScheduleRepository,
+                                  CategoryRepository categoryRepository,
                                   DailyPostRepository dailyPostRepository,
                                   DailyLineItemRepository dailyLineItemRepository,
                                   ExcelSheetParser excelSheetParser) {
@@ -64,6 +68,7 @@ public class ExcelIngestionService {
         this.providerRepository = providerRepository;
         this.offeringRepository = offeringRepository;
         this.offeringScheduleRepository = offeringScheduleRepository;
+        this.categoryRepository = categoryRepository;
         this.dailyPostRepository = dailyPostRepository;
         this.dailyLineItemRepository = dailyLineItemRepository;
         this.excelSheetParser = excelSheetParser;
@@ -113,6 +118,12 @@ public class ExcelIngestionService {
                 offering = offeringRepository.save(
                         new Offering(provider, row.itemName(), description, row.price(), OfferingType.food_item));
                 offeringsCreated++;
+            }
+
+            if (row.categoryName() != null) {
+                Category category = categoryRepository.findByNameIgnoreCase(row.categoryName())
+                        .orElseGet(() -> categoryRepository.save(new Category(row.categoryName())));
+                offering.assignCategory(category);
             }
 
             LocalDate itemDate = row.forDate() != null ? row.forDate() : uploadDate;

@@ -1,9 +1,11 @@
 package in.apnabazaar.search;
 
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -25,5 +27,10 @@ public class SearchController {
     @PostMapping("/search/{offeringId}/click")
     public void recordClick(@PathVariable UUID offeringId) {
         searchService.recordClick(offeringId);
+    }
+
+    @GetMapping("/digest")
+    public DigestResponse getDigest(@RequestParam String communitySlug) {
+        return searchService.getDigest(communitySlug);
     }
 }

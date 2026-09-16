@@ -74,7 +74,7 @@ public class ReservationService {
             throw new ResponseStatusException(CONFLICT, "This reservation has already been rated");
         }
 
-        slot.submitRating(request.rating());
+        slot.submitRating(request.rating(), request.reviewText());
         recalculateProviderRating(slot.getProvider());
     }
 

@@ -6,5 +6,5 @@ import java.util.UUID;
 //a passport-photo crop of a full Offering
 
 public record CatalogEntry(UUID offeringId, String shopName, String offeringName, String description,
-                            String offeringType) {
+                            String offeringType, String categoryName) {
 }

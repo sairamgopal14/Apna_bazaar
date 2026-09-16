@@ -107,6 +107,11 @@
     <h2>Latest weekly AI insight</h2>
     <div id="insight"></div>
   </section>
+
+  <section>
+    <h2>Recent broadcasts</h2>
+    <div id="broadcastHistory"></div>
+  </section>
 </main>
 
 <script>
@@ -186,6 +191,38 @@
     `;
   }
 
+  function renderBroadcastHistory(rows) {
+    const el = document.getElementById('broadcastHistory');
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty">No broadcasts sent yet.</div>';
+      return;
+    }
+    el.innerHTML = `
+      <table>
+        <thead><tr><th>Message</th><th>Type</th><th>Status</th><th>Searches</th><th>WA Taps</th></tr></thead>
+        <tbody>
+          ${rows.map(b => `
+            <tr>
+              <td>${escapeHtml(b.message)}</td>
+              <td>${escapeHtml(b.broadcastType)}</td>
+              <td>${escapeHtml(b.status)}</td>
+              <td>${b.searchesTriggered}</td>
+              <td>${b.whatsappTaps}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function loadBroadcastHistory() {
+    try {
+      const res = await fetch(`/admin/broadcasts/history?communitySlug=${communitySelect.value}`);
+      if (!res.ok) return;
+      renderBroadcastHistory(await res.json());
+    } catch (e) { /* quietly skip -- secondary panel, not critical */ }
+  }
+
   async function loadDashboard() {
     refreshBtn.disabled = true;
     try {
@@ -199,6 +236,7 @@
       renderTopQueries(data.topQueries);
       renderCtr(data.sellerClickThroughRates);
       renderInsight(data.latestInsight, data.insightWeekStart);
+      await loadBroadcastHistory();
     } catch (e) {
       alert('Network error — is the backend running?');
     } finally {

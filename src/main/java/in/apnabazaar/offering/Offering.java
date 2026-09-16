@@ -48,6 +48,10 @@ public class Offering {
     @Column(name = "offering_type", nullable = false, length = 20)
     private OfferingType offeringType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(name = "is_available", nullable = false)
     private boolean available;
 
@@ -68,12 +72,21 @@ public class Offering {
         this.available = true;
     }
 
+    /** A category is optional and may be added or changed later via re-upload. */
+    public void assignCategory(Category category) {
+        this.category = category;
+    }
+
     public UUID getId() {
         return id;
     }
 
     public Provider getProvider() {
         return provider;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public String getName() {

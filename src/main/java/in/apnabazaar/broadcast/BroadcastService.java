@@ -7,6 +7,7 @@ import in.apnabazaar.provider.Provider;
 import in.apnabazaar.provider.ProviderRepository;
 import in.apnabazaar.search.ZeroResultLog;
 import in.apnabazaar.search.ZeroResultLogRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -112,6 +113,14 @@ public class BroadcastService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Unknown broadcast: " + broadcastId));
         broadcast.logPerformance(request.searchesTriggered(), request.whatsappTaps());
         return BroadcastResponse.from(broadcast);
+    }
+
+    /** Past broadcasts, newest first, with whatever performance the admin has logged for them. */
+    public List<BroadcastResponse> getHistory(String communitySlug, int limit) {
+        Community community = findCommunity(communitySlug);
+        return broadcastRepository.findByCommunityOrderByCreatedAtDesc(community, PageRequest.of(0, limit)).stream()
+                .map(BroadcastResponse::from)
+                .toList();
     }
 
     private Community findCommunity(String communitySlug) {

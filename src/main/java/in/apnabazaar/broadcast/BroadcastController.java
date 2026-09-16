@@ -42,4 +42,10 @@ public class BroadcastController {
                                              @Valid @RequestBody UpdatePerformanceRequest request) {
         return broadcastService.logPerformance(broadcastId, request);
     }
+
+    @GetMapping("/admin/broadcasts/history")
+    public List<BroadcastResponse> getHistory(@RequestParam String communitySlug,
+                                               @RequestParam(defaultValue = "20") int limit) {
+        return broadcastService.getHistory(communitySlug, limit);
+    }
 }

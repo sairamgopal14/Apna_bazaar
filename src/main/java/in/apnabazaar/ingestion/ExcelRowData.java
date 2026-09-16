@@ -15,5 +15,5 @@ import java.time.LocalTime;
 record ExcelRowData(String sellerName, String flatNumber, String whatsappNumber, String itemName,
                      String description, BigDecimal price, DeliveryType deliveryType,
                      LocalTime servesFrom, LocalTime servesTo, LocalTime preorderClosesAt,
-                     Short preorderDayOffset, LocalDate forDate) {
+                     Short preorderDayOffset, LocalDate forDate, String categoryName) {
 }

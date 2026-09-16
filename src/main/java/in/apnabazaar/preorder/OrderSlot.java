@@ -52,6 +52,9 @@ public class OrderSlot {
     @Column
     private Short rating;
 
+    @Column(name = "review_text", columnDefinition = "TEXT")
+    private String reviewText;
+
     @Column(name = "rated_at")
     private OffsetDateTime ratedAt;
 
@@ -66,8 +69,9 @@ public class OrderSlot {
     }
 
     /** Records the buyer's real answer to "how was it?" -- the only thing that ever updates a rating. */
-    public void submitRating(int rating) {
+    public void submitRating(int rating, String reviewText) {
         this.rating = (short) rating;
+        this.reviewText = reviewText;
         this.ratedAt = OffsetDateTime.now();
     }
 
@@ -93,5 +97,9 @@ public class OrderSlot {
 
     public Short getRating() {
         return rating;
+    }
+
+    public String getReviewText() {
+        return reviewText;
     }
 }

@@ -21,11 +21,12 @@ import java.util.List;
  * Reads the admin's daily sheet into plain Java data. Expected column order, one header
  * row then one row per item: Seller Name | Flat Number | WhatsApp Number | Item Name |
  * Description | Price | Delivery Type | Serves From | Serves To | Preorder Closes At |
- * Preorder Day Offset | For Date. Every column after Price may be left blank — timing
- * falls back to {@link in.apnabazaar.offering.OfferingSchedule} then a hardcoded default;
- * a blank For Date means "today." For Date also accepts the plain words "today"/"tomorrow"
- * instead of a literal date, since a day-before seller's batter is always for "tomorrow"
- * relative to whenever the admin happens to upload.
+ * Preorder Day Offset | For Date | Category. Every column after Price may be left blank —
+ * timing falls back to {@link in.apnabazaar.offering.OfferingSchedule} then a hardcoded
+ * default; a blank For Date means "today." For Date also accepts the plain words
+ * "today"/"tomorrow" instead of a literal date, since a day-before seller's batter is
+ * always for "tomorrow" relative to whenever the admin happens to upload. Category is
+ * free text — a brand-new word here becomes a brand-new category, no code change needed.
  */
 @Component
 class ExcelSheetParser {
@@ -71,7 +72,12 @@ class ExcelSheetParser {
                 parseTime(cell(row, 8, formatter)),
                 parseTime(cell(row, 9, formatter)),
                 parseDayOffset(cell(row, 10, formatter)),
-                parseForDate(cell(row, 11, formatter)));
+                parseForDate(cell(row, 11, formatter)),
+                blankToNull(cell(row, 12, formatter)));
+    }
+
+    private String blankToNull(String value) {
+        return isBlank(value) ? null : value.trim();
     }
 
     private String cell(Row row, int index, DataFormatter formatter) {

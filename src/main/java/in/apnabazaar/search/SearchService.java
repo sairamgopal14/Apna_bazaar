@@ -79,7 +79,8 @@ public class SearchService {
 
         List<CatalogEntry> catalog = offeringsById.values().stream()
                 .map(o -> new CatalogEntry(o.getId(), o.getProvider().getShopName(), o.getName(),
-                        o.getDescription(), o.getOfferingType().name()))
+                        o.getDescription(), o.getOfferingType().name(),
+                        o.getCategory() != null ? o.getCategory().getName() : null))
                 .toList();
 
         List<UUID> matchedOfferingIds = geminiSearchClient.matchOfferings(request.query(), catalog);
@@ -108,6 +109,45 @@ public class SearchService {
         return new SearchResponse(request.query(), results.size(), results); // returns here
     }
 
+    /**
+     * Every active seller's available listing for today -- no query, no Gemini call, just
+     * "who's open right now." Shown the instant the chatbot loads, like a morning digest.
+     * Deliberately doesn't log a SearchEvent or an impression -- this isn't a search.
+     */
+    @Transactional(readOnly = true)
+    public DigestResponse getDigest(String communitySlug) {
+        Community community = communityRepository.findBySlug(communitySlug)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Unknown community: " + communitySlug));
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+
+        List<Provider> activeProviders = providerRepository.findByCommunityAndStatus(community, ProviderStatus.active);
+        Map<UUID, Offering> offeringsById = activeProviders.stream()
+                .flatMap(provider -> offeringRepository.findByProvider(provider).stream())
+                .filter(Offering::isAvailable)
+                .collect(Collectors.toMap(Offering::getId, o -> o, (a, b) -> a, LinkedHashMap::new));
+
+        List<UUID> offeringIds = new ArrayList<>(offeringsById.keySet());
+
+        Map<UUID, List<DailyLineItem>> lineItemsByOffering = dailyLineItemRepository
+                .findByOfferingIdInAndItemDate(offeringIds, today).stream()
+                .collect(Collectors.groupingBy(li -> li.getOffering().getId()));
+        dailyLineItemRepository.findByOfferingIdInAndItemDate(offeringIds, today.plusDays(1))
+                .forEach(li -> lineItemsByOffering
+                        .computeIfAbsent(li.getOffering().getId(), k -> new ArrayList<>())
+                        .add(li));
+
+        List<SearchResultCard> results = new ArrayList<>();
+        for (UUID offeringId : offeringIds) {
+            Offering offering = offeringsById.get(offeringId);
+            List<DailyLineItem> candidates = lineItemsByOffering.getOrDefault(offeringId, List.of());
+            pickBestLineItem(candidates, now).ifPresent(pick -> results.add(toCard(offering, pick.item(), pick.status())));
+        }
+
+        return new DigestResponse(today, results.size(), results);
+    }
+
     /** A buyer tapped "Order on WhatsApp" for this offering — the other half of click-through rate. */
     @Transactional
     public void recordClick(UUID offeringId) {
@@ -134,7 +174,8 @@ public class SearchService {
                 provider.getId(), provider.getShopName(), provider.getFlatNumber(), provider.getWhatsappNumber(),
                 offering.getId(), offering.getName(), offering.getDescription(),
                 lineItem.getPrice(), lineItem.getDeliveryType().name(), status.label(),
-                lineItem.getId(), provider.getRating());
+                lineItem.getId(), provider.getRating(),
+                offering.getCategory() != null ? offering.getCategory().getName() : null);
     }
 
     private void logSearchEvent(Community community, SearchRequest request, LocalDateTime now, int resultCount) {

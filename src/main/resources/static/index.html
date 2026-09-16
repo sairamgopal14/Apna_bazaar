@@ -150,6 +150,25 @@
     color: #b8860b;
     font-size: 13px;
   }
+  .review-input {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .card .category {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 6px;
+  }
   #inputBar {
     display: flex;
     gap: 8px;
@@ -244,10 +263,11 @@
       const statusClass = /closed|not available/i.test(r.statusLabel) ? 'closed' : 'actionable';
 
       const ratingHtml = r.rating ? ` <span class="rating">★ ${r.rating}</span>` : '';
+      const categoryHtml = r.categoryName ? ` <span class="category">${escapeHtml(r.categoryName)}</span>` : '';
 
       card.innerHTML = `
         <div class="shop">${escapeHtml(r.shopName)}${ratingHtml}</div>
-        <div class="offering">${escapeHtml(r.offeringName)}</div>
+        <div class="offering">${escapeHtml(r.offeringName)}${categoryHtml}</div>
         <div class="desc">${escapeHtml(r.description)}</div>
         <div class="row">
           <span class="price">₹${r.price}</span>
@@ -311,6 +331,11 @@
     card.className = 'msg bot rating-prompt';
     card.innerHTML = `You reserved <strong>${escapeHtml(p.itemName)}</strong> from <strong>${escapeHtml(p.shopName)}</strong> on ${p.itemDate} — how was it?`;
 
+    const reviewInput = document.createElement('input');
+    reviewInput.type = 'text';
+    reviewInput.className = 'review-input';
+    reviewInput.placeholder = 'Optional: say a word about it';
+
     const stars = document.createElement('div');
     stars.className = 'stars';
     for (let i = 1; i <= 5; i++) {
@@ -319,11 +344,12 @@
       starBtn.textContent = '★'.repeat(i);
       starBtn.addEventListener('click', async () => {
         stars.querySelectorAll('button').forEach(b => b.disabled = true);
+        reviewInput.disabled = true;
         try {
           await fetch(`/order-slots/${p.orderSlotId}/rating`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating: i })
+            body: JSON.stringify({ rating: i, reviewText: reviewInput.value.trim() || null })
           });
           stars.innerHTML = '<em>Thanks for rating!</em>';
         } catch (e) {
@@ -332,9 +358,22 @@
       });
       stars.appendChild(starBtn);
     }
+    card.appendChild(reviewInput);
     card.appendChild(stars);
     chat.appendChild(card);
     chat.scrollTop = chat.scrollHeight;
+  }
+
+  async function loadDigest() {
+    try {
+      const res = await fetch(`/digest?communitySlug=${communitySelect.value}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.resultCount > 0) {
+        addMessage(`Here's who's active today (${data.resultCount}):`, 'bot');
+        renderResults(data.results);
+      }
+    } catch (e) { /* quietly skip -- this is a nice-to-have greeting, not critical */ }
   }
 
   function escapeHtml(str) {
@@ -388,6 +427,8 @@
   });
 
   checkPendingRatings();
+  loadDigest();
+  communitySelect.addEventListener('change', loadDigest);
 </script>
 
 </body>

@@ -13,5 +13,5 @@ import java.util.UUID;
 public record SearchResultCard(UUID providerId, String shopName, String flatNumber, String whatsappNumber,
                                 UUID offeringId, String offeringName, String description,
                                 BigDecimal price, String deliveryType, String statusLabel,
-                                UUID dailyLineItemId, BigDecimal rating) {
+                                UUID dailyLineItemId, BigDecimal rating, String categoryName) {
 }
