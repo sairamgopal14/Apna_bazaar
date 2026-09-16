@@ -1,7 +1,6 @@
--- Phase 5 pre-order schema.
--- order_slot is the first genuinely real "buyer intent" signal in this app -- the only
--- reason provider.rating can finally be earned instead of guessed (see Provider.java,
--- SearchResultCard.java comments dating back to Phase 1).
+-- Pre-order schema.
+-- order_slot is the real "buyer intent" signal that provider.rating is computed
+-- from, once a buyer submits a rating.
 
 CREATE TABLE order_slot (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),

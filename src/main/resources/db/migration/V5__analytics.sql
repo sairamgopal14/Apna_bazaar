@@ -1,6 +1,5 @@
--- Phase 4 analytics schema.
--- offering_impression/offering_click give real (if low-volume) click-through-rate data,
--- instead of faking it the way Phase 3 avoided faking broadcast performance.
+-- Analytics schema.
+-- offering_impression/offering_click record real click-through-rate data.
 -- demand_insight stores the weekly AI-written summary of search activity per community.
 
 CREATE TABLE offering_impression (

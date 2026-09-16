@@ -109,11 +109,7 @@ public class SearchService {
         return new SearchResponse(request.query(), results.size(), results); // returns here
     }
 
-    /**
-     * Every active seller's available listing for today -- no query, no Gemini call, just
-     * "who's open right now." Shown the instant the chatbot loads, like a morning digest.
-     * Deliberately doesn't log a SearchEvent or an impression -- this isn't a search.
-     */
+    /** Every active seller's available listing for today. Doesn't call Gemini or log a SearchEvent/impression. */
     @Transactional(readOnly = true)
     public DigestResponse getDigest(String communitySlug) {
         Community community = communityRepository.findBySlug(communitySlug)
@@ -148,7 +144,7 @@ public class SearchService {
         return new DigestResponse(today, results.size(), results);
     }
 
-    /** A buyer tapped "Order on WhatsApp" for this offering — the other half of click-through rate. */
+    /** Records a WhatsApp click for click-through-rate tracking. */
     @Transactional
     public void recordClick(UUID offeringId) {
         Offering offering = offeringRepository.findById(offeringId)

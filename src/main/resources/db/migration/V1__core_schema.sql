@@ -1,7 +1,7 @@
--- Phase 1 core schema.
--- offering_schedule and daily_post are intentionally deferred to Phase 2 (Excel ingestion);
+-- Core schema: communities, sellers, their catalog, and today's specific listings.
+-- offering_schedule and daily_post are added later once Excel ingestion needs them;
 -- daily_line_item carries its own window/timing fields directly until then.
--- category is intentionally omitted: provider_type / offering_type enums already cover it.
+-- category is intentionally omitted here: provider_type / offering_type enums cover it for now.
 
 CREATE TABLE community (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/** Every buyer query, logged for Phase 4 analytics regardless of whether it matched. */
+/** Every buyer query, logged regardless of whether it matched. */
 @Entity
 @Table(name = "search_event")
 public class SearchEvent {

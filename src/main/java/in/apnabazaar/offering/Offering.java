@@ -20,7 +20,7 @@ import java.util.UUID;
 
 /**
  * Permanent catalog entry registered once by the seller.
- * {@link #description} is the field Claude reads for semantic matching —
+ * {@link #description} is the field Gemini reads for semantic matching —
  * today's price/availability lives separately on {@link in.apnabazaar.offering.DailyLineItem}.
  */
 @Entity

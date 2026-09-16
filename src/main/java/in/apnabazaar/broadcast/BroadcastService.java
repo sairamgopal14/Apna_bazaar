@@ -19,12 +19,7 @@ import java.util.UUID;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-/**
- * The brain of Phase 3's one action: turn an admin's decision — write it
- * yourself, pick a Gemini-drafted option, or accept a seller's payment — into
- * a real {@link Broadcast} row. Delivery itself happens separately, in
- * {@link BroadcastScheduler}; this class only ever creates and reads.
- */
+/** Creates and reads {@link Broadcast} records. Delivery happens separately in {@link BroadcastScheduler}. */
 @Service
 public class BroadcastService {
 

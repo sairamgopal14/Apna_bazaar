@@ -39,14 +39,9 @@ public class DailyLineItem {
     @JoinColumn(name = "offering_id", nullable = false)
     private Offering offering;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Same here: daily_post_id on a daily_line_item row holds some value, say abc-123.
-    // Hibernate takes that value and looks for the daily_post row whose own id column is also abc-123. When it finds that match, that's the linked DailyPost.
-    // It's not column-name-matches-column-name — it's this row's stored value matches that row's own identity number.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "daily_post_id")
     private DailyPost dailyPost;
-    //when Hibernate loads one specific DailyLineItem row, it reads the daily_post_id value stamped on that exact row,
-    // then goes and finds the DailyPost whose own id matches it.
-    // DailyLineItem is always the one doing the asking; DailyPost is always the one being found.
 
     @Column(name = "item_date", nullable = false)
     private LocalDate itemDate;

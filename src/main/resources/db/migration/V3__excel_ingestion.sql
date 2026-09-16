@@ -1,4 +1,4 @@
--- Phase 2: Excel ingestion introduces the two tables deferred from Phase 1.
+-- Excel ingestion introduces two tables.
 --
 -- offering_schedule: a seller's recurring weekly default timing (one row per
 -- offering). The admin's daily sheet can leave timing columns blank when

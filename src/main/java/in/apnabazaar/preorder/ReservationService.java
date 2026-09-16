@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-/** The Phase 5 "brain" -- creates real reservations with a live cutoff re-check, and turns real ratings into provider.rating. */
+/** Creates reservations with a live ordering-window check, and recalculates provider ratings. */
 @Service
 public class ReservationService {
 

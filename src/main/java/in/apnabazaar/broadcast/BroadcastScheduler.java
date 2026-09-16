@@ -12,11 +12,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-/**
- * Runs on its own, once a minute — this project's first proactive piece.
- * Everything before this only ever ran because a buyer searched or an admin
- * uploaded something; nothing here waits to be asked.
- */
+/** Checks once a minute for scheduled or recurring broadcasts that are due, and delivers them. */
 @Component
 public class BroadcastScheduler {
 

@@ -50,7 +50,7 @@ public class Provider {
     @Column(nullable = false, length = 20)
     private ProviderStatus status;
 
-    // see ReservationService.recalculateProviderRating.
+    // Set only via updateRating(), from ReservationService.recalculateProviderRating.
     @Column(precision = 3, scale = 2)
     private BigDecimal rating;
 

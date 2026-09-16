@@ -33,17 +33,10 @@ import java.util.UUID;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
- * The brain of Phase 2's one action: turn the admin's daily sheet into real
- * providers, offerings, and today's listings. Everything it writes is read by
- * the exact same search flow from Phase 1, unchanged — this class only ever
- * changes how data gets IN, never how search reads it back out.
- *
- * Two simplifications, worth knowing rather than hiding: a brand-new seller's
- * {@code name} and {@code shopName} are both set from the sheet's one "Seller
- * Name" column (the sheet has no separate display-name column), and every new
- * seller is assumed {@link ProviderType#food_seller} (the sheet has no
- * provider-type column either) — both easy to extend later if a real need
- * for a distinct value shows up.
+ * Turns the admin's daily sheet into providers, offerings, and today's listings.
+ * New sellers get {@code name} and {@code shopName} both set from the sheet's single
+ * "Seller Name" column, and default to {@link ProviderType#food_seller}, since the
+ * sheet has no separate display-name or provider-type column.
  */
 @Service
 public class ExcelIngestionService {

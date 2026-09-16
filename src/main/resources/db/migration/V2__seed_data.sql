@@ -1,7 +1,6 @@
--- Phase 1 manual seed: two real communities, a handful of active sellers with rich
--- catalog descriptions. daily_line_item rows (today's price/window) are NOT seeded
--- here since Flyway migrations run once — DevDataSeeder creates/refreshes those on
--- every app startup so `today` always has data, whichever day you actually run this.
+-- Manual seed: two real communities, a handful of active sellers with rich catalog
+-- descriptions. daily_line_item rows (today's price/window) are not seeded here --
+-- those come from the admin's daily Excel upload instead.
 
 INSERT INTO community (id, name, slug, total_flats, city) VALUES
     ('11111111-1111-1111-1111-111111111111', 'MyHome Tridasa', 'tridasa', 2700, 'Hyderabad'),

@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-/** The Phase 4 "brain" — turns the quiet logging from Phases 1-3 into a readable dashboard and a weekly AI insight. */
+/** Builds the admin dashboard and generates the weekly AI insight from aggregated search data. */
 @Service
 public class AnalyticsService {
 

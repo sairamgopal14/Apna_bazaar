@@ -1,8 +1,8 @@
--- Phase 3: the broadcast table. Every broadcast gets created for real (organic,
--- AI-generated, or sponsored) and genuinely delivered by a real scheduled job.
--- searches_triggered/whatsapp_taps are the one deliberately manual piece — there's
--- no real WhatsApp delivery integration to auto-track them, so the admin logs
--- what they personally observed afterward (see BroadcastController).
+-- The broadcast table. Every broadcast gets created for real (organic,
+-- AI-generated, or sponsored) and delivered by a scheduled job.
+-- searches_triggered/whatsapp_taps are logged manually -- there's no real
+-- WhatsApp delivery integration to auto-track them, so the admin reports
+-- what they personally observed afterward.
 
 CREATE TABLE broadcast (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),

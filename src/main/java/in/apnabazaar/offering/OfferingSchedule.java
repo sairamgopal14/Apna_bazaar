@@ -18,13 +18,12 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
- * A seller's recurring weekly default timing for one offering — introduced in
- * Phase 2 so the admin's daily sheet can leave timing columns blank when
- * nothing changed, instead of retyping "5-9 AM" every morning. Ingestion reads
- * this as a fallback whenever a day's row doesn't specify a value; the values
- * actually saved onto that day's {@link DailyLineItem} are always fully
- * resolved by the time they're written, so nothing downstream of ingestion
- * (search, ordering-window logic) ever needs to know this table exists.
+ * A seller's recurring weekly default timing for one offering, so the admin's daily
+ * sheet can leave timing columns blank when nothing changed instead of retyping the
+ * same hours every morning. Ingestion reads this as a fallback whenever a day's row
+ * doesn't specify a value; the values saved onto that day's {@link DailyLineItem} are
+ * always fully resolved by the time they're written, so nothing downstream (search,
+ * ordering-window logic) ever needs to know this table exists.
  */
 @Entity
 @Table(name = "offering_schedule")

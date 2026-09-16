@@ -11,10 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 /**
- * Wakes up once a week, no request involved — the same proactive pattern as
- * {@link in.apnabazaar.broadcast.BroadcastScheduler}, just on a weekly alarm instead of a
- * per-minute one. Turns the past 7 days of quiet SearchEvent logging into one saved,
- * plain-English {@link DemandInsight} per community.
+ * Runs weekly (see {@link in.apnabazaar.broadcast.BroadcastScheduler} for the per-minute
+ * equivalent), turning the past 7 days of {@code SearchEvent} data into a saved
+ * {@link DemandInsight} per community.
  */
 @Component
 public class DemandInsightScheduler {

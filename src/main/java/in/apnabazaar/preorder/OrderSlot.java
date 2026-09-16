@@ -17,11 +17,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * One real reservation -- the first genuinely real "this buyer intends to order" signal
- * in the whole app. Everything before this phase only ever displayed information;
- * this is the first thing that gets permanently remembered because a buyer acted on it.
- */
+/** A buyer's reservation for one offering on a specific day. */
 @Entity
 @Table(name = "order_slot")
 public class OrderSlot {
@@ -68,7 +64,7 @@ public class OrderSlot {
         this.sessionId = sessionId;
     }
 
-    /** Records the buyer's real answer to "how was it?" -- the only thing that ever updates a rating. */
+    /** Records the buyer's rating and optional review text. */
     public void submitRating(int rating, String reviewText) {
         this.rating = (short) rating;
         this.reviewText = reviewText;

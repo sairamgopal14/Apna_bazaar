@@ -16,10 +16,8 @@ import java.util.stream.Collectors;
 
 /**
  * Sends the buyer's query plus the community's active catalog to Gemini and asks it to
- * pick which offerings genuinely match — this is the core product differentiator over
- * keyword search: "idli" should surface "South Indian breakfast tiffin" even though the
- * words never overlap. Gemini's free tier is used
- *  here so the whole build stays free through all five phases (see project notes).
+ * pick which offerings genuinely match by meaning, not keyword overlap — "idli" should
+ * surface "South Indian breakfast tiffin" even though the words never overlap.
  */
 @Component
 public class GeminiSearchClient {
@@ -109,8 +107,7 @@ public class GeminiSearchClient {
                     .collect(Collectors.toSet());
 
             String[] rawIds = objectMapper.readValue(matcher.group(), String[].class);
-            //This is the most important safety idea in the whole file: Gemini could, in theory,
-            // hallucinate an ID that doesn't actually exist in our real catalog.
+            // Filter out any ID Gemini returns that isn't actually in the catalog.
             List<UUID> matched = new ArrayList<>();
             for (String rawId : rawIds) {
                 if (validIds.contains(rawId)) {
